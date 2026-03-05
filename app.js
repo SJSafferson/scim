@@ -239,6 +239,7 @@ const TRANSLATIONS = {
     colReturn:      "Return",
     colAllocation:  "Allocation",
     dividendsTitle: "Dividends by Year",
+    depositsTitle:  "Deposits by Year",
     assetClass: { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
   },
   sv: {
@@ -268,6 +269,7 @@ const TRANSLATIONS = {
     colReturn:      "Avkastning",
     colAllocation:  "Andel",
     dividendsTitle: "Utdelningar per år",
+    depositsTitle:  "Insättningar per år",
     assetClass: { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
   },
 };
@@ -626,6 +628,105 @@ function renderDividendsSection() {
   }).join("");
 }
 
+// ── Deposits by Year ───────────────────────────────────────────────────────
+function renderDepositsSection() {
+  const byYear = {};
+  PORTFOLIO_TRANSACTIONS
+    .filter(t => t.type === "deposit")
+    .forEach(t => {
+      const year = t.date.slice(0, 4);
+      byYear[year] = (byYear[year] || 0) + t.amount;
+    });
+
+  const yearKeys = Object.keys(byYear).sort();
+  const amounts = yearKeys.map(y => byYear[y]);
+
+  const cumulative = [];
+  let sum = 0;
+  amounts.forEach(a => { sum += a; cumulative.push(sum); });
+
+  if (activeCharts["depositsChart"]) activeCharts["depositsChart"].destroy();
+
+  const ctx = document.getElementById("depositsChart").getContext("2d");
+  activeCharts["depositsChart"] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: yearKeys,
+      datasets: [
+        {
+          label: currentLang === "sv" ? "Insättning" : "Deposit",
+          data: amounts,
+          backgroundColor: "#6c8ef5",
+          borderWidth: 0,
+          borderRadius: 4,
+          yAxisID: "y",
+        },
+        {
+          label: currentLang === "sv" ? "Kumulativt" : "Cumulative",
+          data: cumulative,
+          type: "line",
+          borderColor: "#34d399",
+          backgroundColor: "rgba(52,211,153,0.08)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: "#34d399",
+          borderWidth: 2,
+          yAxisID: "y2",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: "#8892a4", font: { size: 13 } },
+        },
+        y: {
+          position: "left",
+          grid: { color: "#2a2e42" },
+          ticks: {
+            color: "#8892a4",
+            font: { size: 11 },
+            callback: v => v >= 1000 ? (v / 1000).toFixed(1) + "k" : v,
+          },
+        },
+        y2: {
+          position: "right",
+          grid: { display: false },
+          ticks: {
+            color: "#8892a4",
+            font: { size: 11 },
+            callback: v => v >= 1000 ? (v / 1000).toFixed(1) + "k" : v,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          labels: { color: "#e2e8f0", font: { size: 11 }, boxWidth: 12, padding: 12 },
+        },
+        tooltip: {
+          backgroundColor: "#1a1d27",
+          borderColor: "#2a2e42",
+          borderWidth: 1,
+          titleColor: "#e2e8f0",
+          bodyColor: "#8892a4",
+          padding: 10,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${fmt.currency(ctx.parsed.y)}`,
+          },
+        },
+      },
+    },
+  });
+
+  document.getElementById("depositYearTotals").innerHTML = yearKeys.map(y =>
+    `<div class="div-year-item"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(byYear[y])}</span></div>`
+  ).join("");
+}
+
 // ── Full Render ────────────────────────────────────────────────────────────
 function render() {
   const computed = computeHoldings();
@@ -653,4 +754,5 @@ function renderDate() {
   applyTranslations();
   render();
   renderDividendsSection();
+  renderDepositsSection();
 })();
