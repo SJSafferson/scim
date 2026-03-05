@@ -315,13 +315,29 @@ let sortDir         = 1; // 1 = asc, -1 = desc
 // symbol → { prices: [{t: ms, p: price}], currency: "SEK"|"EUR"|… }
 const chartPriceCache = {};
 
+// ── CORS proxy helpers ─────────────────────────────────────────────────────
+const CORS_PROXIES = [
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
+async function fetchViaProxy(yahooUrl) {
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const res = await fetch(proxy(yahooUrl), { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const json = await res.json();
+      return json;
+    } catch { /* try next proxy */ }
+  }
+  throw new Error("All proxies failed");
+}
+
 // ── Live Price Fetching ────────────────────────────────────────────────────
 async function fetchChart(symbol) {
   const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
-  const url = `https://corsproxy.io/?url=${encodeURIComponent(yahooUrl)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
+  const data = await fetchViaProxy(yahooUrl);
   const meta = data?.chart?.result?.[0]?.meta;
   if (!meta?.regularMarketPrice) throw new Error("No price");
   return { price: meta.regularMarketPrice, currency: meta.currency };
@@ -738,10 +754,7 @@ async function loadChartPrices() {
   await Promise.allSettled(symbols.map(async symbol => {
     try {
       const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1wk&range=10y`;
-      const url = `https://corsproxy.io/?url=${encodeURIComponent(yahooUrl)}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await fetchViaProxy(yahooUrl);
       const result = json?.chart?.result?.[0];
       if (!result) throw new Error("No result");
       const ts     = result.timestamp;
