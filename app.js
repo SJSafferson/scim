@@ -240,6 +240,7 @@ const TRANSLATIONS = {
     colAllocation:  "Allocation",
     dividendsTitle: "Dividends by Year",
     depositsTitle:  "Deposits by Year",
+    backBtn:        "← Back",
     assetClass: { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
   },
   sv: {
@@ -270,6 +271,7 @@ const TRANSLATIONS = {
     colAllocation:  "Andel",
     dividendsTitle: "Utdelningar per år",
     depositsTitle:  "Insättningar per år",
+    backBtn:        "← Tillbaka",
     assetClass: { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
   },
 };
@@ -621,11 +623,51 @@ function renderDividendsSection() {
     },
   });
 
-  // Year totals summary
+  // Year totals summary — clickable
   document.getElementById("divYearTotals").innerHTML = yearKeys.map(y => {
     const total = Object.values(byYear[y]).reduce((s, v) => s + v, 0);
-    return `<div class="div-year-item"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
+    return `<div class="div-year-item div-year-clickable" onclick="showDividendYear('${y}')"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
   }).join("");
+}
+
+function showDividendYear(year) {
+  const { byYear, tickers } = computeDividendsByYear();
+
+  // Keep same color mapping as the bar chart
+  const tickerColors = {};
+  tickers.forEach((tk, i) => { tickerColors[tk] = DIVIDEND_TICKER_COLORS[i % DIVIDEND_TICKER_COLORS.length]; });
+
+  const yearTickers = Object.keys(byYear[year] || {}).sort();
+  const values  = yearTickers.map(tk => byYear[year][tk]);
+  const colors  = yearTickers.map(tk => tickerColors[tk]);
+  const total   = values.reduce((s, v) => s + v, 0);
+
+  document.getElementById("dividendsChartWrap").style.display = "none";
+  const detail = document.getElementById("dividendsDetail");
+  detail.style.display = "block";
+  document.getElementById("dividendsDetailYear").textContent = year;
+
+  buildDonut("dividendsDetailChart", yearTickers, values, colors);
+
+  document.getElementById("dividendsDetailLegend").innerHTML = yearTickers.map((tk, i) => `
+    <div class="legend-item">
+      <div class="legend-left">
+        <div class="legend-dot" style="background:${colors[i]}"></div>
+        <span class="legend-label">${tk}</span>
+      </div>
+      <span class="legend-value">${fmt.currency(values[i])}</span>
+      <span class="legend-pct">${((values[i] / total) * 100).toFixed(1)}%</span>
+    </div>
+  `).join("");
+}
+
+function hideDividendYear() {
+  document.getElementById("dividendsChartWrap").style.display = "";
+  document.getElementById("dividendsDetail").style.display = "none";
+  if (activeCharts["dividendsDetailChart"]) {
+    activeCharts["dividendsDetailChart"].destroy();
+    delete activeCharts["dividendsDetailChart"];
+  }
 }
 
 // ── Deposits by Year ───────────────────────────────────────────────────────

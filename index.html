@@ -81,8 +81,20 @@
         <h2 class="card-title" data-i18n="dividendsTitle">Utdelningar per år</h2>
         <div class="div-year-totals" id="divYearTotals"></div>
       </div>
-      <div class="dividends-chart-wrap">
+      <div class="dividends-chart-wrap" id="dividendsChartWrap">
         <canvas id="dividendsChart"></canvas>
+      </div>
+      <div class="dividends-detail" id="dividendsDetail">
+        <div class="dividends-detail-header">
+          <button class="back-btn" data-i18n="backBtn" onclick="hideDividendYear()">← Tillbaka</button>
+          <span class="dividends-detail-year" id="dividendsDetailYear"></span>
+        </div>
+        <div class="dividends-detail-body">
+          <div class="dividends-detail-chart-wrap">
+            <canvas id="dividendsDetailChart"></canvas>
+          </div>
+          <div class="legend" id="dividendsDetailLegend"></div>
+        </div>
       </div>
     </section>
 

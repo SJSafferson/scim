@@ -104,7 +104,7 @@ body {
 }
 
 /* ── Summary Cards ────────────────────────────────────────── */
-main { padding: 28px 24px; }
+main { padding: 48px 24px 28px; }
 
 .summary-cards {
   display: grid;
@@ -479,6 +479,71 @@ main { padding: 28px 24px; }
 .dividends-chart-wrap {
   position: relative;
   height: 260px;
+}
+
+/* ── Dividends Detail View ────────────────────────────────── */
+.div-year-clickable {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.div-year-clickable:hover {
+  opacity: 0.7;
+}
+
+.div-year-clickable:hover .div-total {
+  color: var(--accent);
+}
+
+.dividends-detail {
+  display: none;
+}
+
+.dividends-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dividends-detail-year {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dividends-detail-body {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.dividends-detail-chart-wrap {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.dividends-detail-chart-wrap canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.back-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 /* ── Utility ──────────────────────────────────────────────── */
