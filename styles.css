@@ -104,7 +104,7 @@ body {
 }
 
 /* ── Summary Cards ────────────────────────────────────────── */
-main { padding: 28px 24px; }
+main { padding: 48px 24px 28px; }
 
 .summary-cards {
   display: grid;
