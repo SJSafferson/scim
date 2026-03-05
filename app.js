@@ -315,61 +315,57 @@ let sortDir         = 1; // 1 = asc, -1 = desc
 // symbol → { prices: [{t: ms, p: price}], currency: "SEK"|"EUR"|… }
 const chartPriceCache = {};
 
-// ── CORS proxy helpers ─────────────────────────────────────────────────────
-const CORS_PROXIES = [
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://thingproxy.freeboard.io/fetch/${url}`,
-];
+// ── Finnhub API ────────────────────────────────────────────────────────────
+const FINNHUB_KEY = 'd6kp1ehr01qmopd1iqo0d6kp1ehr01qmopd1iqog';
 
-async function fetchViaProxy(yahooUrl) {
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const res = await fetch(proxy(yahooUrl), { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) continue;
-      const json = await res.json();
-      return json;
-    } catch { /* try next proxy */ }
-  }
-  throw new Error("All proxies failed");
+function symbolCurrency(yahooSymbol) {
+  if (!yahooSymbol) return 'SEK';
+  const ext = yahooSymbol.split('.').pop().toUpperCase();
+  if (ext === 'DE') return 'EUR';
+  if (ext === 'NO') return 'NOK';
+  if (ext === 'CO') return 'DKK';
+  return 'SEK';
 }
 
 // ── Live Price Fetching ────────────────────────────────────────────────────
-async function fetchChart(symbol) {
-  const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
-  const data = await fetchViaProxy(yahooUrl);
-  const meta = data?.chart?.result?.[0]?.meta;
-  if (!meta?.regularMarketPrice) throw new Error("No price");
-  return { price: meta.regularMarketPrice, currency: meta.currency };
-}
-
 async function fetchLivePrices() {
   setPriceStatus("loading");
 
   const targets = holdings.filter(h => h.yahooSymbol);
   if (!targets.length) { setPriceStatus("static"); return; }
 
-  const fxSymbols = ["EURSEK=X", "NOKSEK=X", "DKKSEK=X"];
-  const allSymbols = [...new Set(targets.map(h => h.yahooSymbol)), ...fxSymbols];
+  const [eurSekRate, nokSekRate, dkkSekRate] = await Promise.all([
+    fetch(`https://finnhub.io/api/v1/forex/rates?base=EUR&token=${FINNHUB_KEY}`)
+      .then(r => r.json()).then(d => d.quote?.SEK).catch(() => null),
+    fetch(`https://finnhub.io/api/v1/forex/rates?base=NOK&token=${FINNHUB_KEY}`)
+      .then(r => r.json()).then(d => d.quote?.SEK).catch(() => null),
+    fetch(`https://finnhub.io/api/v1/forex/rates?base=DKK&token=${FINNHUB_KEY}`)
+      .then(r => r.json()).then(d => d.quote?.SEK).catch(() => null),
+  ]);
 
-  const results = await Promise.allSettled(allSymbols.map(async s => ({ s, ...(await fetchChart(s)) })));
+  const eurSek = eurSekRate ?? 11.2;
+  const nokSek = nokSekRate ?? 0.97;
+  const dkkSek = dkkSekRate ?? 1.50;
+
+  const uniqueSymbols = [...new Set(targets.map(h => h.yahooSymbol))];
+  const results = await Promise.allSettled(uniqueSymbols.map(async s => {
+    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(s)}&token=${FINNHUB_KEY}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.c) throw new Error('No price');
+    return { s, price: data.c };
+  }));
 
   const quotes = {};
-  results.forEach(r => { if (r.status === "fulfilled") quotes[r.value.s] = r.value; });
-
-  const eurSek = quotes["EURSEK=X"]?.price ?? 11.2;
-  const nokSek = quotes["NOKSEK=X"]?.price ?? 0.97;
-  const dkkSek = quotes["DKKSEK=X"]?.price ?? 1.50;
+  results.forEach(r => { if (r.status === "fulfilled") quotes[r.value.s] = r.value.price; });
 
   let updated = 0;
   targets.forEach(h => {
-    const q = quotes[h.yahooSymbol];
-    if (!q) return;
-    const rate = q.currency === "EUR" ? eurSek
-               : q.currency === "NOK" ? nokSek
-               : q.currency === "DKK" ? dkkSek
-               : 1;
-    h.price = q.price * rate;
+    const price = quotes[h.yahooSymbol];
+    if (price == null) return;
+    const cur  = symbolCurrency(h.yahooSymbol);
+    const rate = cur === 'EUR' ? eurSek : cur === 'NOK' ? nokSek : cur === 'DKK' ? dkkSek : 1;
+    h.price = price * rate;
     updated++;
   });
 
@@ -746,29 +742,38 @@ function renderDividendsSection() {
 
 // ── Historical Price Fetching (performance chart) ──────────────────────────
 async function loadChartPrices() {
-  const symbols = [
-    ...new Set(PORTFOLIO_TRANSACTIONS.filter(t => t.symbol).map(t => t.symbol)),
-    "EURSEK=X",
-  ];
+  const stockSymbols = [...new Set(PORTFOLIO_TRANSACTIONS.filter(t => t.symbol).map(t => t.symbol))];
+  const to   = Math.floor(Date.now() / 1000);
+  const from = to - 10 * 365 * 24 * 3600;
 
-  await Promise.allSettled(symbols.map(async symbol => {
-    try {
-      const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1wk&range=10y`;
-      const json = await fetchViaProxy(yahooUrl);
-      const result = json?.chart?.result?.[0];
-      if (!result) throw new Error("No result");
-      const ts     = result.timestamp;
-      const closes = result.indicators?.quote?.[0]?.close;
-      const currency = result.meta?.currency;
-      if (!ts || !closes) throw new Error("No data");
-      const prices = ts
-        .map((t, i) => ({ t: t * 1000, p: closes[i] }))
-        .filter(p => p.p != null);
-      chartPriceCache[symbol] = { prices, currency };
-    } catch (e) {
-      console.warn(`Chart prices failed for ${symbol}:`, e.message);
-    }
-  }));
+  await Promise.allSettled([
+    ...stockSymbols.map(async symbol => {
+      try {
+        const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(symbol)}&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (json.s === 'no_data' || !json.t) throw new Error('No data');
+        const prices = json.t.map((t, i) => ({ t: t * 1000, p: json.c[i] })).filter(p => p.p != null);
+        chartPriceCache[symbol] = { prices, currency: symbolCurrency(symbol) };
+      } catch (e) {
+        console.warn(`Chart prices failed for ${symbol}:`, e.message);
+      }
+    }),
+    (async () => {
+      try {
+        const url = `https://finnhub.io/api/v1/forex/candle?symbol=OANDA:EUR_SEK&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (json.s === 'no_data' || !json.t) throw new Error('No data');
+        const prices = json.t.map((t, i) => ({ t: t * 1000, p: json.c[i] })).filter(p => p.p != null);
+        chartPriceCache['EURSEK=X'] = { prices, currency: 'SEK' };
+      } catch (e) {
+        console.warn('Chart prices failed for EURSEK=X:', e.message);
+      }
+    })(),
+  ]);
 }
 
 function getChartPriceAt(symbol, dateMs) {
