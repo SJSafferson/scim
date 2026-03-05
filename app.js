@@ -277,7 +277,6 @@ function applyTranslations() {
     const text = TRANSLATIONS[currentLang][el.dataset.i18n];
     if (text) el.textContent = text;
   });
-  document.getElementById("refreshBtn").title = t("refreshTitle");
   document.getElementById("langBtn").textContent = currentLang === "sv" ? "EN" : "SV";
   document.documentElement.lang = currentLang;
 }
