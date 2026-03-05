@@ -660,6 +660,7 @@ function renderDepositsSection() {
           borderWidth: 0,
           borderRadius: 4,
           yAxisID: "y",
+          order: 2,
         },
         {
           label: currentLang === "sv" ? "Kumulativt" : "Cumulative",
@@ -673,6 +674,7 @@ function renderDepositsSection() {
           pointBackgroundColor: "#34d399",
           borderWidth: 2,
           yAxisID: "y2",
+          order: 1,
         },
       ],
     },
