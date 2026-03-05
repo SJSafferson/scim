@@ -399,103 +399,6 @@ main { padding: 28px 24px; }
   text-align: right;
 }
 
-/* ── Price Status ─────────────────────────────────────────── */
-.price-status-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  justify-content: flex-end;
-  margin-bottom: 6px;
-}
-
-.price-status {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.price-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.price-dot.live {
-  background: var(--green);
-  box-shadow: 0 0 4px var(--green);
-}
-
-.price-dot.loading {
-  background: #fbbf24;
-  animation: pulse 1s infinite;
-}
-
-.price-dot.error {
-  background: var(--red);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-
-.refresh-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  border-radius: 4px;
-  width: 22px;
-  height: 22px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  transition: color 0.15s, border-color 0.15s;
-  padding: 0;
-}
-
-.refresh-btn:hover:not(:disabled) {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.refresh-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.live-tag {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--green);
-  border: 1px solid var(--green);
-  border-radius: 3px;
-  padding: 1px 4px;
-  vertical-align: middle;
-  opacity: 0.8;
-}
-
-.static-tag {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 1px 4px;
-  vertical-align: middle;
-}
 
 /* ── Language Toggle ──────────────────────────────────────── */
 .lang-btn {
@@ -515,26 +418,6 @@ main { padding: 28px 24px; }
 .lang-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
-}
-
-/* ── Performance Chart ────────────────────────────────────── */
-.perf-card {
-  margin-bottom: 24px;
-}
-
-.perf-loading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-muted);
-  font-size: 13px;
-  padding: 48px 0;
-  justify-content: center;
-}
-
-.perf-chart-wrap {
-  position: relative;
-  height: 320px;
 }
 
 /* ── Dividends by Year ────────────────────────────────────── */

@@ -236,14 +236,6 @@ const TRANSLATIONS = {
     colGainLoss:    "Gain / Loss",
     colReturn:      "Return",
     colAllocation:  "Allocation",
-    statusLoading:  "Fetching prices…",
-    statusStatic:   "Static prices",
-    tagLive:        "live",
-    tagStatic:      "static",
-    refreshTitle:      "Refresh prices",
-    performanceTitle:  "Portfolio Performance",
-    labelPortfolioValue: "Portfolio Value",
-    labelInvested:     "Invested Capital",
     dividendsTitle: "Dividends by Year",
     assetClass: { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
   },
@@ -273,14 +265,6 @@ const TRANSLATIONS = {
     colGainLoss:    "Vinst / förlust",
     colReturn:      "Avkastning",
     colAllocation:  "Andel",
-    statusLoading:  "Hämtar priser…",
-    statusStatic:   "Statiska priser",
-    tagLive:        "live",
-    tagStatic:      "statisk",
-    refreshTitle:      "Uppdatera priser",
-    performanceTitle:  "Portföljutveckling",
-    labelPortfolioValue: "Portföljvärde",
-    labelInvested:     "Investerat kapital",
     dividendsTitle: "Utdelningar per år",
     assetClass: { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
   },
@@ -307,104 +291,8 @@ function toggleLang() {
 // ── State ──────────────────────────────────────────────────────────────────
 let activeFilter    = "all";
 let activeCharts    = {};
-let pricesReady     = false;
 let sortKey         = null;
 let sortDir         = 1; // 1 = asc, -1 = desc
-
-// ── Historical Price Cache (for performance chart) ─────────────────────────
-// symbol → { prices: [{t: ms, p: price}], currency: "SEK"|"EUR"|… }
-const chartPriceCache = {};
-
-// ── Finnhub API ────────────────────────────────────────────────────────────
-const FINNHUB_KEY = 'd6kp1ehr01qmopd1iqo0d6kp1ehr01qmopd1iqog';
-
-function symbolCurrency(yahooSymbol) {
-  if (!yahooSymbol) return 'SEK';
-  const ext = yahooSymbol.split('.').pop().toUpperCase();
-  if (ext === 'DE') return 'EUR';
-  if (ext === 'NO') return 'NOK';
-  if (ext === 'CO') return 'DKK';
-  return 'SEK';
-}
-
-// ── Live Price Fetching ────────────────────────────────────────────────────
-async function fetchLivePrices() {
-  setPriceStatus("loading");
-
-  const targets = holdings.filter(h => h.yahooSymbol);
-  if (!targets.length) { setPriceStatus("static"); return; }
-
-  const [eurSekRate, nokSekRate, dkkSekRate] = await Promise.all([
-    fetch(`https://finnhub.io/api/v1/forex/rates?base=EUR&token=${FINNHUB_KEY}`)
-      .then(r => r.json()).then(d => d.quote?.SEK).catch(() => null),
-    fetch(`https://finnhub.io/api/v1/forex/rates?base=NOK&token=${FINNHUB_KEY}`)
-      .then(r => r.json()).then(d => d.quote?.SEK).catch(() => null),
-    fetch(`https://finnhub.io/api/v1/forex/rates?base=DKK&token=${FINNHUB_KEY}`)
-      .then(r => r.json()).then(d => d.quote?.SEK).catch(() => null),
-  ]);
-
-  const eurSek = eurSekRate ?? 11.2;
-  const nokSek = nokSekRate ?? 0.97;
-  const dkkSek = dkkSekRate ?? 1.50;
-
-  const uniqueSymbols = [...new Set(targets.map(h => h.yahooSymbol))];
-  const results = await Promise.allSettled(uniqueSymbols.map(async s => {
-    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(s)}&token=${FINNHUB_KEY}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!data.c) throw new Error('No price');
-    return { s, price: data.c };
-  }));
-
-  const quotes = {};
-  results.forEach(r => { if (r.status === "fulfilled") quotes[r.value.s] = r.value.price; });
-
-  let updated = 0;
-  targets.forEach(h => {
-    const price = quotes[h.yahooSymbol];
-    if (price == null) return;
-    const cur  = symbolCurrency(h.yahooSymbol);
-    const rate = cur === 'EUR' ? eurSek : cur === 'NOK' ? nokSek : cur === 'DKK' ? dkkSek : 1;
-    h.price = price * rate;
-    updated++;
-  });
-
-  if (updated === 0) {
-    console.warn("Live price fetch failed: no prices returned");
-    setPriceStatus("error");
-    return;
-  }
-
-  pricesReady = true;
-  setPriceStatus("live", updated, targets.length);
-}
-
-// ── Price Status UI ────────────────────────────────────────────────────────
-function setPriceStatus(state, updated = 0, total = 0) {
-  const el         = document.getElementById("priceStatus");
-  const refreshBtn = document.getElementById("refreshBtn");
-
-  if (state === "loading") {
-    el.innerHTML = `<span class="price-dot loading"></span>${t("statusLoading")}`;
-    refreshBtn.disabled = true;
-  } else if (state === "live") {
-    const time    = new Date().toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
-    const partial = updated < total ? ` (${updated}/${total})` : "";
-    el.innerHTML  = `<span class="price-dot live"></span>Live${partial} · ${time}`;
-    refreshBtn.disabled = false;
-  } else if (state === "error") {
-    el.innerHTML = `<span class="price-dot error"></span>${t("statusStatic")}`;
-    refreshBtn.disabled = false;
-  } else {
-    el.innerHTML = `<span class="price-dot"></span>${t("statusStatic")}`;
-    refreshBtn.disabled = false;
-  }
-}
-
-async function refreshPrices() {
-  await fetchLivePrices();
-  render();
-}
 
 // ── Derived Data ───────────────────────────────────────────────────────────
 function computeHoldings() {
@@ -584,16 +472,13 @@ function renderTable(computed) {
   }
   document.getElementById("holdingsBody").innerHTML = rows.map(h => {
     const badge   = BADGE_CLASS[h.assetClass] || "";
-    const liveTag = (pricesReady && h.yahooSymbol)
-      ? `<span class="live-tag">${t("tagLive")}</span>`
-      : '';
     return `
       <tr>
         <td><span class="holding-name">${h.name}</span></td>
         <td><span class="holding-ticker">${h.ticker}</span></td>
         <td><span class="badge ${badge}">${TRANSLATIONS[currentLang].assetClass[h.assetClass] || h.assetClass}</span></td>
         <td class="num">${fmt.shares(h.shares)}</td>
-        <td class="num">${fmt.currency(h.price)} ${liveTag}</td>
+        <td class="num">${fmt.currency(h.price)}</td>
         <td class="num">${fmt.currency(h.gav)}</td>
         <td class="num">${fmt.currency(h.marketValue)}</td>
         <td class="num">${fmt.currency(h.costBasis)}</td>
@@ -740,207 +625,6 @@ function renderDividendsSection() {
   }).join("");
 }
 
-// ── Historical Price Fetching (performance chart) ──────────────────────────
-async function loadChartPrices() {
-  const stockSymbols = [...new Set(PORTFOLIO_TRANSACTIONS.filter(t => t.symbol).map(t => t.symbol))];
-  const to   = Math.floor(Date.now() / 1000);
-  const from = to - 10 * 365 * 24 * 3600;
-
-  await Promise.allSettled([
-    ...stockSymbols.map(async symbol => {
-      try {
-        const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(symbol)}&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        if (json.s === 'no_data' || !json.t) throw new Error('No data');
-        const prices = json.t.map((t, i) => ({ t: t * 1000, p: json.c[i] })).filter(p => p.p != null);
-        chartPriceCache[symbol] = { prices, currency: symbolCurrency(symbol) };
-      } catch (e) {
-        console.warn(`Chart prices failed for ${symbol}:`, e.message);
-      }
-    }),
-    (async () => {
-      try {
-        const url = `https://finnhub.io/api/v1/forex/candle?symbol=OANDA:EUR_SEK&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        if (json.s === 'no_data' || !json.t) throw new Error('No data');
-        const prices = json.t.map((t, i) => ({ t: t * 1000, p: json.c[i] })).filter(p => p.p != null);
-        chartPriceCache['EURSEK=X'] = { prices, currency: 'SEK' };
-      } catch (e) {
-        console.warn('Chart prices failed for EURSEK=X:', e.message);
-      }
-    })(),
-  ]);
-}
-
-function getChartPriceAt(symbol, dateMs) {
-  const data = chartPriceCache[symbol];
-  if (!data || !data.prices.length) return null;
-  // Last close at or before dateMs
-  let result = null;
-  for (const p of data.prices) {
-    if (p.t <= dateMs) result = p.p;
-    else break;
-  }
-  return result;
-}
-
-function buildPerformanceTimeline() {
-  const txns = [...PORTFOLIO_TRANSACTIONS].sort((a, b) => a.date.localeCompare(b.date));
-  if (!txns.length) return [];
-
-  // Monthly snapshots from first transaction to today
-  const start = new Date(txns[0].date);
-  const end   = new Date();
-  const snapshots = [];
-  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
-  while (cur <= end) {
-    snapshots.push(new Date(cur));
-    cur.setMonth(cur.getMonth() + 1);
-  }
-  snapshots.push(new Date(end)); // include today as final point
-
-  let cash = 0, invested = 0;
-  const stocks = {};         // symbol → shares
-  const funds  = {};         // name   → { shares, cost }
-  let ti = 0;
-
-  return snapshots.map(snap => {
-    // Process all transactions through end of this month
-    const monthEnd = new Date(snap.getFullYear(), snap.getMonth() + 1, 0, 23, 59, 59);
-    while (ti < txns.length && new Date(txns[ti].date) <= monthEnd) {
-      const tx = txns[ti++];
-      if (tx.type === "deposit") {
-        cash += tx.amount;
-        invested += tx.amount;
-      } else if (tx.type === "buy") {
-        cash -= tx.cost;
-        if (tx.symbol) {
-          stocks[tx.symbol] = (stocks[tx.symbol] || 0) + tx.shares;
-        } else if (tx.name) {
-          if (!funds[tx.name]) funds[tx.name] = { shares: 0, cost: 0 };
-          funds[tx.name].shares += tx.shares;
-          funds[tx.name].cost   += tx.cost;
-        }
-      } else if (tx.type === "sell") {
-        cash += tx.proceeds;
-        if (tx.symbol) {
-          stocks[tx.symbol] = (stocks[tx.symbol] || 0) - tx.shares;
-          if (stocks[tx.symbol] < 0.001) delete stocks[tx.symbol];
-        } else if (tx.name && funds[tx.name]) {
-          const f = funds[tx.name];
-          const frac = tx.shares / f.shares;
-          f.cost   -= f.cost * frac;
-          f.shares -= tx.shares;
-          if (f.shares < 0.001) delete funds[tx.name];
-        }
-      }
-    }
-
-    const snapMs = snap.getTime();
-    const eurSek = getChartPriceAt("EURSEK=X", snapMs) ?? 11.0;
-
-    let value = cash;
-    for (const [sym, shares] of Object.entries(stocks)) {
-      if (shares < 0.001) continue;
-      const p = getChartPriceAt(sym, snapMs);
-      if (p == null) continue;
-      const rate = chartPriceCache[sym]?.currency === "EUR" ? eurSek : 1;
-      value += shares * p * rate;
-    }
-    // Funds: use cost basis as proxy (no market price available)
-    for (const pos of Object.values(funds)) {
-      value += pos.cost;
-    }
-
-    return { t: snap, value, invested };
-  });
-}
-
-function renderPerformanceChart(chartData) {
-  document.getElementById("perfLoading").style.display = "none";
-  document.getElementById("perfChartWrap").style.display = "block";
-
-  if (!chartData || chartData.length === 0) return;
-
-  if (activeCharts["performanceChart"]) activeCharts["performanceChart"].destroy();
-
-  const ctx = document.getElementById("performanceChart").getContext("2d");
-  activeCharts["performanceChart"] = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: chartData.map(d => d.t),
-      datasets: [
-        {
-          label: t("labelPortfolioValue"),
-          data: chartData.map(d => d.value),
-          borderColor: "#6c8ef5",
-          backgroundColor: "rgba(108,142,245,0.08)",
-          fill: true,
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.3,
-        },
-        {
-          label: t("labelInvested"),
-          data: chartData.map(d => d.invested),
-          borderColor: "#fbbf24",
-          backgroundColor: "transparent",
-          fill: false,
-          borderWidth: 2,
-          borderDash: [4, 4],
-          pointRadius: 0,
-          tension: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      scales: {
-        x: {
-          type: "time",
-          time: { unit: "month", displayFormats: { month: "MMM yy" } },
-          grid: { color: "#2a2e42" },
-          ticks: { color: "#8892a4", maxTicksLimit: 14, font: { size: 11 } },
-        },
-        y: {
-          grid: { color: "#2a2e42" },
-          ticks: {
-            color: "#8892a4",
-            font: { size: 11 },
-            callback: v => v >= 1000 ? (v / 1000).toFixed(0) + "k kr" : v + " kr",
-          },
-        },
-      },
-      plugins: {
-        legend: {
-          labels: { color: "#e2e8f0", font: { size: 12 }, boxWidth: 24, padding: 16 },
-        },
-        tooltip: {
-          backgroundColor: "#1a1d27",
-          borderColor: "#2a2e42",
-          borderWidth: 1,
-          titleColor: "#e2e8f0",
-          bodyColor: "#8892a4",
-          padding: 10,
-          callbacks: {
-            title: items => {
-              const d = new Date(items[0].parsed.x);
-              return d.toLocaleDateString("sv-SE", { year: "numeric", month: "long" });
-            },
-            label: ctx => ` ${ctx.dataset.label}: ${fmt.currency(ctx.parsed.y)}`,
-          },
-        },
-      },
-    },
-  });
-}
-
 // ── Full Render ────────────────────────────────────────────────────────────
 function render() {
   const computed = computeHoldings();
@@ -961,17 +645,9 @@ function renderDate() {
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────────
-(async function init() {
+(function init() {
   renderDate();
   applyTranslations();
   render();
   renderDividendsSection();
-
-  await Promise.all([
-    fetchLivePrices().then(() => render()),
-    loadChartPrices().then(() => {
-      const data = buildPerformanceTimeline();
-      renderPerformanceChart(data);
-    }),
-  ]);
 })();

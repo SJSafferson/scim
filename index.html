@@ -17,11 +17,7 @@
         <span class="header-date" id="headerDate"></span>
       </div>
       <div class="header-right">
-        <div class="price-status-wrap">
-          <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
-          <span class="price-status" id="priceStatus"></span>
-          <button class="refresh-btn" id="refreshBtn" onclick="refreshPrices()">&#8635;</button>
-        </div>
+        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
         <span class="portfolio-label" data-i18n="portfolioLabel">Totalt värde</span>
         <span class="portfolio-total" id="totalValue">—</span>
       </div>
@@ -76,17 +72,6 @@
           <canvas id="exchangeChart"></canvas>
         </div>
         <div class="legend" id="exchangeLegend"></div>
-      </div>
-    </section>
-
-    <!-- Performance Chart -->
-    <section class="card perf-card">
-      <h2 class="card-title" data-i18n="performanceTitle">Portföljutveckling</h2>
-      <div class="perf-loading" id="perfLoading">
-        <span class="price-dot loading"></span>&nbsp;<span data-i18n="statusLoading">Hämtar priser…</span>
-      </div>
-      <div class="perf-chart-wrap" id="perfChartWrap" style="display:none">
-        <canvas id="performanceChart"></canvas>
       </div>
     </section>
 
