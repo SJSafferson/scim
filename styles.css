@@ -241,8 +241,19 @@ main { padding: 28px 24px; }
   gap: 12px;
 }
 
-.holdings-header .card-title {
+.holdings-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.holdings-title-row .card-title {
   margin-bottom: 0;
+}
+
+.prices-updated-label {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .table-filters {

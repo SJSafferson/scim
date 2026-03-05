@@ -8,6 +8,8 @@
 //   price        - Fallback price per share (SEK) — used if live fetch fails
 //   costBasis    - Total cost basis (SEK, what you paid in total)
 
+const PRICES_UPDATED = "2026-03-05"; // ← uppdatera detta när du ändrar priserna
+
 const holdings = [
   { name: "Nibe Industrier AB",            ticker: "NIBE B",   yahooSymbol: "NIBE-B.ST",  assetClass: "Equity", shares: 246, price: 39.57,  costBasis: 11384.88 },
   { name: "Billerud AB",                   ticker: "BILL",     yahooSymbol: "BILL.ST",    assetClass: "Equity", shares: 90,  price: 80.60,  costBasis: 10001.70 },
@@ -641,6 +643,8 @@ function renderDate() {
   document.getElementById("headerDate").textContent = new Date().toLocaleDateString("sv-SE", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
+  const d = new Date(PRICES_UPDATED).toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
+  document.getElementById("pricesUpdatedLabel").textContent = `Priser uppdaterade ${d}`;
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────────
