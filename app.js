@@ -238,9 +238,10 @@ const TRANSLATIONS = {
     colGainLoss:    "Gain / Loss",
     colReturn:      "Return",
     colAllocation:  "Allocation",
-    dividendsTitle: "Dividends by Year",
-    depositsTitle:  "Deposits by Year",
-    backBtn:        "← Back",
+    dividendsTitle:  "Dividends by Year",
+    depositsTitle:   "Deposits by Year",
+    backBtn:         "← Back",
+    pricesUpdated:   "Prices updated",
     assetClass: { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
   },
   sv: {
@@ -269,9 +270,10 @@ const TRANSLATIONS = {
     colGainLoss:    "Vinst / förlust",
     colReturn:      "Avkastning",
     colAllocation:  "Andel",
-    dividendsTitle: "Utdelningar per år",
-    depositsTitle:  "Insättningar per år",
-    backBtn:        "← Tillbaka",
+    dividendsTitle:  "Utdelningar per år",
+    depositsTitle:   "Insättningar per år",
+    backBtn:         "← Tillbaka",
+    pricesUpdated:   "Priser uppdaterade",
     assetClass: { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
   },
 };
@@ -290,6 +292,7 @@ function applyTranslations() {
 function toggleLang() {
   currentLang = currentLang === "sv" ? "en" : "sv";
   applyTranslations();
+  renderDate();
   render();
 }
 
@@ -781,15 +784,19 @@ function render() {
   initFilters(computed);
   initSort(computed);
   renderTable(computed);
+  renderDividendsSection();
+  renderDepositsSection();
 }
 
 // ── Header Date ────────────────────────────────────────────────────────────
 function renderDate() {
-  document.getElementById("headerDate").textContent = new Date().toLocaleDateString("sv-SE", {
+  const locale = currentLang === "sv" ? "sv-SE" : "en-GB";
+  document.getElementById("headerDate").textContent = new Date().toLocaleDateString(locale, {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
-  const d = new Date(PRICES_UPDATED).toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
-  document.getElementById("pricesUpdatedLabel").textContent = `Priser uppdaterade ${d}`;
+  const [y, m, day] = PRICES_UPDATED.split("-").map(Number);
+  const d = new Date(y, m - 1, day).toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" });
+  document.getElementById("pricesUpdatedLabel").textContent = `${t("pricesUpdated")} ${d}`;
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────────
@@ -797,6 +804,4 @@ function renderDate() {
   renderDate();
   applyTranslations();
   render();
-  renderDividendsSection();
-  renderDepositsSection();
 })();
