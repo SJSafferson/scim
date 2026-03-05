@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCIM</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-left">
+        <h1 class="site-title">SCIM</h1>
+        <span class="header-date" id="headerDate"></span>
+      </div>
+      <div class="header-right">
+        <div class="price-status-wrap">
+          <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+          <span class="price-status" id="priceStatus"></span>
+          <button class="refresh-btn" id="refreshBtn" onclick="refreshPrices()">&#8635;</button>
+        </div>
+        <span class="portfolio-label" data-i18n="portfolioLabel">Totalt värde</span>
+        <span class="portfolio-total" id="totalValue">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Summary Cards -->
+    <section class="summary-cards">
+      <div class="card summary-card">
+        <div class="card-label" data-i18n="totalInvested">Totalt investerat</div>
+        <div class="card-value" id="totalInvested">—</div>
+      </div>
+      <div class="card summary-card">
+        <div class="card-label" data-i18n="totalGainLoss">Total vinst / förlust</div>
+        <div class="card-value" id="totalGainLoss">—</div>
+        <div class="card-sub" id="totalGainLossPct">—</div>
+      </div>
+      <div class="card summary-card">
+        <div class="card-label" data-i18n="holdingsCount">Antal innehav</div>
+        <div class="card-value" id="holdingsCount">—</div>
+      </div>
+      <div class="card summary-card">
+        <div class="card-label" data-i18n="bestPerformer">Bäst avkastning</div>
+        <div class="card-value" id="bestPerformer">—</div>
+        <div class="card-sub" id="bestPerformerPct">—</div>
+      </div>
+    </section>
+
+    <!-- Charts Row -->
+    <section class="charts-row">
+      <div class="card chart-card">
+        <h2 class="card-title" data-i18n="allocationByClass">Fördelning per tillgångsslag</h2>
+        <div class="chart-wrap">
+          <canvas id="allocationChart"></canvas>
+        </div>
+        <div class="legend" id="allocationLegend"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2 class="card-title" data-i18n="allocationByHolding">Fördelning per innehav</h2>
+        <div class="chart-wrap">
+          <canvas id="holdingsChart"></canvas>
+        </div>
+        <div class="legend" id="holdingsLegend"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2 class="card-title" data-i18n="allocationByExchange">Fördelning per börs</h2>
+        <div class="chart-wrap">
+          <canvas id="exchangeChart"></canvas>
+        </div>
+        <div class="legend" id="exchangeLegend"></div>
+      </div>
+    </section>
+
+    <!-- Performance Chart -->
+    <section class="card perf-card">
+      <h2 class="card-title" data-i18n="performanceTitle">Portföljutveckling</h2>
+      <div class="perf-loading" id="perfLoading">
+        <span class="price-dot loading"></span>&nbsp;<span data-i18n="statusLoading">Hämtar priser…</span>
+      </div>
+      <div class="perf-chart-wrap" id="perfChartWrap" style="display:none">
+        <canvas id="performanceChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Dividends by Year -->
+    <section class="card dividends-card">
+      <div class="dividends-header">
+        <h2 class="card-title" data-i18n="dividendsTitle">Utdelningar per år</h2>
+        <div class="div-year-totals" id="divYearTotals"></div>
+      </div>
+      <div class="dividends-chart-wrap">
+        <canvas id="dividendsChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Holdings Table -->
+    <section class="card holdings-card">
+      <div class="holdings-header">
+        <h2 class="card-title" data-i18n="holdingsTitle">Innehav</h2>
+        <div class="table-filters">
+          <button class="filter-btn active" data-filter="all" data-i18n="filterAll">Alla</button>
+          <button class="filter-btn" data-filter="Equity" data-i18n="filterEquity">Aktier</button>
+          <button class="filter-btn" data-filter="Fixed Income" data-i18n="filterFixedIncome">Räntebärande</button>
+          <button class="filter-btn" data-filter="Alternative" data-i18n="filterAlternative">Alternativa</button>
+          <button class="filter-btn" data-filter="Cash" data-i18n="filterCash">Kassa</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="holdings-table" id="holdingsTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="name"><span data-i18n="colName">Namn</span><span class="sort-ind"></span></th>
+              <th class="sortable" data-sort="ticker"><span data-i18n="colTicker">Ticker</span><span class="sort-ind"></span></th>
+              <th class="sortable" data-sort="assetClass"><span data-i18n="colAssetClass">Tillgångsslag</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="shares"><span data-i18n="colShares">Antal</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="price"><span data-i18n="colPrice">Pris</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="gav"><span data-i18n="colGav">GAV</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="marketValue"><span data-i18n="colMarketValue">Marknadsvärde</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="costBasis"><span data-i18n="colCostBasis">Anskaffningsvärde</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="gainLoss"><span data-i18n="colGainLoss">Vinst / förlust</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="returnPct"><span data-i18n="colReturn">Avkastning</span><span class="sort-ind"></span></th>
+              <th class="num sortable" data-sort="allocation"><span data-i18n="colAllocation">Andel</span><span class="sort-ind"></span></th>
+            </tr>
+          </thead>
+          <tbody id="holdingsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
