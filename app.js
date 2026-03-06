@@ -587,6 +587,16 @@ function renderDividendsSection() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: (event, elements) => {
+        const index = elements.length > 0 ? elements[0].index : (() => {
+          const pts = activeCharts["dividendsChart"].getElementsAtEventForMode(event.native, "index", { intersect: false }, false);
+          return pts.length > 0 ? pts[0].index : -1;
+        })();
+        if (index >= 0) showDividendModal(yearKeys[index], byYear, tickerColors);
+      },
+      onHover: (event, elements) => {
+        event.native.target.style.cursor = elements.length > 0 ? "pointer" : "default";
+      },
       scales: {
         x: {
           stacked: true,
@@ -626,11 +636,71 @@ function renderDividendsSection() {
     },
   });
 
-  // Year totals summary — clickable
-  document.getElementById("divYearTotals").innerHTML = yearKeys.map(y => {
+  // Year totals summary
+  const divYearTotalsEl = document.getElementById("divYearTotals");
+  divYearTotalsEl.innerHTML = yearKeys.map(y => {
     const total = Object.values(byYear[y]).reduce((s, v) => s + v, 0);
-    return `<div class="div-year-item div-year-clickable" onclick="showDividendYear('${y}')"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
+    return `<div class="div-year-item" data-year="${y}"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
   }).join("");
+  divYearTotalsEl.querySelectorAll(".div-year-item").forEach(el => {
+    el.addEventListener("click", () => showDividendModal(el.dataset.year, byYear, tickerColors));
+  });
+}
+
+// ── Dividend Year Modal ────────────────────────────────────
+function showDividendModal(year, byYear, tickerColors) {
+  const yearData = byYear[year] || {};
+  const tickers = Object.keys(yearData).sort((a, b) => yearData[b] - yearData[a]);
+  const values  = tickers.map(t => yearData[t]);
+  const colors  = tickers.map(t => tickerColors[t]);
+  const total   = values.reduce((s, v) => s + v, 0);
+
+  document.getElementById("divModalTitle").textContent =
+    (currentLang === "sv" ? "Utdelningar " : "Dividends ") + year;
+
+  if (activeCharts["divModalChart"]) activeCharts["divModalChart"].destroy();
+  const ctx = document.getElementById("divModalChart").getContext("2d");
+  activeCharts["divModalChart"] = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: tickers,
+      datasets: [{ data: values, backgroundColor: colors, borderColor: "#1a1d27", borderWidth: 3 }],
+    },
+    options: {
+      cutout: "68%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+              return ` ${fmt.currency(ctx.parsed)}  (${pct}%)`;
+            },
+          },
+          backgroundColor: "#1a1d27", borderColor: "#2a2e42", borderWidth: 1,
+          titleColor: "#e2e8f0", bodyColor: "#8892a4", padding: 10,
+        },
+      },
+      animation: { animateRotate: true, duration: 400 },
+    },
+  });
+
+  document.getElementById("divModalLegend").innerHTML = tickers.map((ticker, i) => `
+    <div class="legend-item">
+      <div class="legend-left">
+        <div class="legend-dot" style="background:${colors[i]}"></div>
+        <span class="legend-label">${ticker}</span>
+      </div>
+      <span class="legend-value">${fmt.currency(values[i])}</span>
+      <span class="legend-pct">${((values[i] / total) * 100).toFixed(1)}%</span>
+    </div>
+  `).join("");
+
+  document.getElementById("divModal").classList.add("open");
+}
+
+function closeDivModal() {
+  document.getElementById("divModal").classList.remove("open");
 }
 
 function showDividendYear(year) {
@@ -804,4 +874,5 @@ function renderDate() {
   renderDate();
   applyTranslations();
   render();
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDivModal(); });
 })();

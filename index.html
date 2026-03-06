@@ -148,6 +148,20 @@
 
   </main>
 
+  <!-- Dividend Year Modal -->
+  <div class="modal-overlay" id="divModal" onclick="closeDivModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="divModalTitle"></h3>
+        <button class="modal-close" onclick="closeDivModal()">&times;</button>
+      </div>
+      <div class="modal-chart-wrap">
+        <canvas id="divModalChart"></canvas>
+      </div>
+      <div class="modal-legend" id="divModalLegend"></div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

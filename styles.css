@@ -104,7 +104,7 @@ body {
 }
 
 /* ── Summary Cards ────────────────────────────────────────── */
-main { padding: 48px 24px 28px; }
+main.container { padding: 28px 24px; }
 
 .summary-cards {
   display: grid;
@@ -482,22 +482,7 @@ main { padding: 48px 24px 28px; }
 }
 
 /* ── Dividends Detail View ────────────────────────────────── */
-.div-year-clickable {
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.div-year-clickable:hover {
-  opacity: 0.7;
-}
-
-.div-year-clickable:hover .div-total {
-  color: var(--accent);
-}
-
-.dividends-detail {
-  display: none;
-}
+.dividends-detail { display: none; }
 
 .dividends-detail-header {
   display: flex;
@@ -544,6 +529,71 @@ main { padding: 48px 24px 28px; }
 .back-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+/* ── Dividend Year Modal ──────────────────────────────────── */
+.div-year-item {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.div-year-item:hover { opacity: 0.7; }
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-chart-wrap {
+  max-width: 220px;
+  margin: 0 auto 20px;
+}
+
+.modal-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ── Utility ──────────────────────────────────────────────── */
