@@ -262,7 +262,7 @@ const TRANSLATIONS = {
   en: {
     portfolioLabel:      "Total Value",
     totalInvested:       "Total Invested",
-    totalGainLoss:       "Total Gain / Loss",
+    totalGainLoss:       "Gain / Loss",
     holdingsCount:       "Number of Holdings",
     bestPerformer:       "Best Performer",
     allocationByClass:   "Allocation by Asset Class",
@@ -299,7 +299,7 @@ const TRANSLATIONS = {
   sv: {
     portfolioLabel:      "Totalt värde",
     totalInvested:       "Totalt investerat",
-    totalGainLoss:       "Total vinst / förlust",
+    totalGainLoss:       "Vinst / förlust",
     holdingsCount:       "Antal innehav",
     bestPerformer:       "Bäst avkastning",
     allocationByClass:   "Fördelning per tillgångsslag",
