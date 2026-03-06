@@ -24,6 +24,13 @@
     </div>
   </header>
 
+  <div class="quote-banner">
+    <div class="container">
+      <span class="quote-text" id="quoteText"></span>
+      <span class="quote-author" id="quoteAuthor"></span>
+    </div>
+  </div>
+
   <main class="container">
 
     <!-- Summary Cards -->
@@ -45,6 +52,16 @@
         <div class="card-label" data-i18n="bestPerformer">Bäst avkastning</div>
         <div class="card-value" id="bestPerformer">—</div>
         <div class="card-sub" id="bestPerformerPct">—</div>
+      </div>
+      <div class="card summary-card">
+        <div class="card-label" data-i18n="worstPerformer">Sämst avkastning</div>
+        <div class="card-value" id="worstPerformer">—</div>
+        <div class="card-sub" id="worstPerformerPct">—</div>
+      </div>
+      <div class="card summary-card">
+        <div class="card-label" data-i18n="concentration">Topp 3-andel</div>
+        <div class="card-value" id="concentrationTop3">—</div>
+        <div class="card-sub" id="concentrationFx">—</div>
       </div>
     </section>
 
@@ -72,6 +89,14 @@
           <canvas id="exchangeChart"></canvas>
         </div>
         <div class="legend" id="exchangeLegend"></div>
+      </div>
+    </section>
+
+    <!-- Portfolio Performance -->
+    <section class="card performance-card">
+      <h2 class="card-title" data-i18n="performanceTitle">Kapitalutveckling</h2>
+      <div class="performance-chart-wrap">
+        <canvas id="performanceChart"></canvas>
       </div>
     </section>
 
@@ -161,6 +186,12 @@
       <div class="modal-legend" id="divModalLegend"></div>
     </div>
   </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-disclaimer" data-i18n="disclaimer">Informationen på denna sida är endast avsedd för personligt bruk och utgör inte finansiell rådgivning. Historisk avkastning är ingen garanti för framtida resultat.</p>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>

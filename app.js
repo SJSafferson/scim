@@ -1,3 +1,34 @@
+// ── Quotes ─────────────────────────────────────────────────────────────────
+const QUOTES = [
+  { text: "The stock market is a device for transferring money from the impatient to the patient.", author: "Warren Buffett" },
+  { text: "It's far better to buy a wonderful company at a fair price than a fair company at a wonderful price.", author: "Warren Buffett" },
+  { text: "Risk comes from not knowing what you're doing.", author: "Warren Buffett" },
+  { text: "Price is what you pay. Value is what you get.", author: "Warren Buffett" },
+  { text: "Invert, always invert.", author: "Charlie Munger" },
+  { text: "Show me the incentive and I'll show you the outcome.", author: "Charlie Munger" },
+  { text: "The best thing a human being can do is to help another human being know more.", author: "Charlie Munger" },
+  { text: "The individual investor should act consistently as an investor and not as a speculator.", author: "Benjamin Graham" },
+  { text: "In the short run, the market is a voting machine. In the long run, it is a weighing machine.", author: "Benjamin Graham" },
+  { text: "Know what you own, and know why you own it.", author: "Peter Lynch" },
+  { text: "Far more money has been lost by investors preparing for corrections than has been lost in corrections themselves.", author: "Peter Lynch" },
+  { text: "Don't look for the needle in the haystack. Just buy the haystack.", author: "John Bogle" },
+  { text: "Time is your friend; impulse is your enemy.", author: "John Bogle" },
+  { text: "The most important thing is not to be fooled — and the easiest person to fool is yourself.", author: "Howard Marks" },
+  { text: "You can't predict. You can prepare.", author: "Howard Marks" },
+  { text: "The biggest mistake investors make is to believe that what happened in the recent past is likely to persist.", author: "Ray Dalio" },
+  { text: "Bull markets are born on pessimism, grown on skepticism, mature on optimism, and die on euphoria.", author: "John Templeton" },
+  { text: "The four most dangerous words in investing are: 'This time it's different.'", author: "John Templeton" },
+  { text: "Markets can remain irrational longer than you can remain solvent.", author: "John Maynard Keynes" },
+  { text: "The stock market is filled with individuals who know the price of everything, but the value of nothing.", author: "Philip Fisher" },
+  { text: "Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn't, pays it.", author: "Albert Einstein" },
+];
+
+(function initQuote() {
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById("quoteText").textContent   = q.text;
+  document.getElementById("quoteAuthor").textContent = q.author;
+})();
+
 // ── Holdings Data ──────────────────────────────────────────────────────────
 // Fields:
 //   name         - Full investment name
@@ -8,18 +39,18 @@
 //   price        - Fallback price per share (SEK) — used if live fetch fails
 //   costBasis    - Total cost basis (SEK, what you paid in total)
 
-const PRICES_UPDATED = "2026-03-05"; // ← uppdatera detta när du ändrar priserna
+const PRICES_UPDATED = "2026-03-06"; // ← uppdatera detta när du ändrar priserna
 
 const holdings = [
-  { name: "Nibe Industrier AB",            ticker: "NIBE B",   yahooSymbol: "NIBE-B.ST",  assetClass: "Equity", shares: 246, price: 35.81,  costBasis: 11384.88 },
-  { name: "Billerud AB",                   ticker: "BILL",     yahooSymbol: "BILL.ST",    assetClass: "Equity", shares: 90,  price: 78.6,  costBasis: 10001.70 },
-  { name: "Axfood AB",                     ticker: "AXFO",     yahooSymbol: "AXFO.ST",    assetClass: "Equity", shares: 5,   price: 322.9, costBasis: 1450.00  },
-  { name: "Industrivärden AB",             ticker: "INDU C",   yahooSymbol: "INDU-C.ST",  assetClass: "Equity", shares: 3,   price: 490.7, costBasis: 1247.01  },
-  { name: "Volvo AB",                      ticker: "VOLV B",   yahooSymbol: "VOLV-B.ST",  assetClass: "Equity", shares: 4,   price: 337.5, costBasis: 1184.00  },
-  { name: "ARK Innovation UCITS ETF USD A",ticker: "ARXK",     yahooSymbol: "ARXK.DE",    assetClass: "Equity", shares: 18,  price: 71.55,  costBasis: 1342.32  },
-  { name: "Hanza AB",                      ticker: "HANZA",    yahooSymbol: "HANZA.ST",   assetClass: "Equity", shares: 119, price: 167.8, costBasis: 7551.74  },
-  { name: "Berner Industrier AB",          ticker: "BERNER B", yahooSymbol: "BERNER-B.ST",assetClass: "Equity", shares: 172, price: 103, costBasis: 9193.40  },
-  { name: "CTT Systems AB",                ticker: "CTT",      yahooSymbol: "CTT.ST",     assetClass: "Equity", shares: 32,  price: 138.2, costBasis: 9064.96  },
+  { name: "Nibe Industrier AB",            ticker: "NIBE B",   yahooSymbol: "NIBE-B.ST",  assetClass: "Equity", shares: 246, price: 35.01,  costBasis: 11384.88 },
+  { name: "Billerud AB",                   ticker: "BILL",     yahooSymbol: "BILL.ST",    assetClass: "Equity", shares: 90,  price: 77.8,  costBasis: 10001.70 },
+  { name: "Axfood AB",                     ticker: "AXFO",     yahooSymbol: "AXFO.ST",    assetClass: "Equity", shares: 5,   price: 321.0, costBasis: 1450.00  },
+  { name: "Industrivärden AB",             ticker: "INDU C",   yahooSymbol: "INDU-C.ST",  assetClass: "Equity", shares: 3,   price: 482.0, costBasis: 1247.01  },
+  { name: "Volvo AB",                      ticker: "VOLV B",   yahooSymbol: "VOLV-B.ST",  assetClass: "Equity", shares: 4,   price: 329.2, costBasis: 1184.00  },
+  { name: "ARK Innovation UCITS ETF USD A",ticker: "ARXK",     yahooSymbol: "ARXK.DE",    assetClass: "Equity", shares: 18,  price: 70.60,  costBasis: 1342.32  },
+  { name: "Hanza AB",                      ticker: "HANZA",    yahooSymbol: "HANZA.ST",   assetClass: "Equity", shares: 119, price: 165.2, costBasis: 7551.74  },
+  { name: "Berner Industrier AB",          ticker: "BERNER B", yahooSymbol: "BERNER-B.ST",assetClass: "Equity", shares: 172, price: 103.0, costBasis: 9193.40  },
+  { name: "CTT Systems AB",                ticker: "CTT",      yahooSymbol: "CTT.ST",     assetClass: "Equity", shares: 32,  price: 140.8, costBasis: 9064.96  },
   { name: "Saldo",                         ticker: "SALDO",    yahooSymbol: null,          assetClass: "Cash",   shares: 1,   price: 138.39, costBasis: 138.39   },
 ];
 
@@ -205,6 +236,13 @@ function getExchange(h) {
   return EXCHANGE_SUFFIX_MAP[suffix] || suffix;
 }
 
+const CURRENCY_MAP = { "ST": "SEK", "OL": "NOK", "CO": "DKK", "HE": "EUR", "DE": "EUR", "L": "GBP" };
+function getCurrency(h) {
+  if (!h.yahooSymbol) return "SEK";
+  const suffix = h.yahooSymbol.split(".").pop();
+  return CURRENCY_MAP[suffix] || "SEK";
+}
+
 const ASSET_CLASS_COLORS = {
   "Equity":       "#6c8ef5",
   "Fixed Income": "#fbbf24",
@@ -252,7 +290,11 @@ const TRANSLATIONS = {
     backBtn:         "← Back",
     pricesUpdated:   "Prices updated",
     total:           "Total",
-    assetClass: { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
+    assetClass:       { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
+    disclaimer:       "The information on this page is for personal use only and does not constitute financial advice. Past performance is no guarantee of future results.",
+    worstPerformer:   "Worst Performer",
+    concentration:    "Top 3 Weight",
+    performanceTitle: "Capital Development",
   },
   sv: {
     portfolioLabel:      "Totalt värde",
@@ -285,7 +327,11 @@ const TRANSLATIONS = {
     backBtn:         "← Tillbaka",
     pricesUpdated:   "Priser uppdaterade",
     total:           "Totalt",
-    assetClass: { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
+    assetClass:       { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
+    disclaimer:       "Informationen på denna sida är endast avsedd för personligt bruk och utgör inte finansiell rådgivning. Historisk avkastning är ingen garanti för framtida resultat.",
+    worstPerformer:   "Sämst avkastning",
+    concentration:    "Topp 3-andel",
+    performanceTitle: "Kapitalutveckling",
   },
 };
 
@@ -360,9 +406,25 @@ function renderSummary(computed) {
   if (best) {
     document.getElementById("bestPerformer").textContent = best.ticker;
     const bp = document.getElementById("bestPerformerPct");
-    bp.textContent = fmt.pct(best.returnPct);
+    bp.textContent = fmt.pct(best.returnPct) + "  ·  " + fmt.currency(best.gainLoss);
     bp.className   = "card-sub " + signClass(best.returnPct);
   }
+
+  const equityHoldings = computed.filter(h => h.assetClass !== "Cash");
+  const worst = [...equityHoldings].sort((a, b) => a.returnPct - b.returnPct)[0];
+  if (worst) {
+    document.getElementById("worstPerformer").textContent = worst.ticker;
+    const wp = document.getElementById("worstPerformerPct");
+    wp.textContent = fmt.pct(worst.returnPct) + "  ·  " + fmt.currency(worst.gainLoss);
+    wp.className   = "card-sub " + signClass(worst.returnPct);
+  }
+
+  const byValue   = [...computed].sort((a, b) => b.marketValue - a.marketValue);
+  const top3Pct   = byValue.slice(0, 3).reduce((s, h) => s + h.allocation, 0);
+  const fxPct     = computed.reduce((s, h) => getCurrency(h) !== "SEK" ? s + h.allocation : s, 0);
+  document.getElementById("concentrationTop3").textContent = top3Pct.toFixed(1) + "%";
+  document.getElementById("concentrationFx").textContent   =
+    (currentLang === "sv" ? "EUR-exponering: " : "EUR exposure: ") + fxPct.toFixed(1) + "%";
 }
 
 // ── Donut Charts ───────────────────────────────────────────────────────────
@@ -497,7 +559,7 @@ function renderTable(computed) {
         <td><span class="holding-ticker">${h.ticker}</span></td>
         <td><span class="badge ${badge}">${TRANSLATIONS[currentLang].assetClass[h.assetClass] || h.assetClass}</span></td>
         <td class="num">${fmt.shares(h.shares)}</td>
-        <td class="num">${fmt.currency(h.price)}</td>
+        <td class="num">${fmt.currency(h.price)}${getCurrency(h) !== "SEK" ? `<span class="currency-note">${getCurrency(h)}</span>` : ""}</td>
         <td class="num">${fmt.currency(h.gav)}</td>
         <td class="num">${fmt.currency(h.marketValue)}</td>
         <td class="num">${fmt.currency(h.costBasis)}</td>
@@ -860,6 +922,117 @@ function renderDepositsSection() {
   ).join("") + `<div class="div-year-item div-year-grand-total"><span class="div-year">${t("total")}</span><span class="div-total">${fmt.currency(depositGrandTotal)}</span></div>`;
 }
 
+// ── Portfolio Performance Chart ─────────────────────────────────────────────
+function renderPerformanceSection() {
+  // Group transactions by date, sorted
+  const txByDate = {};
+  PORTFOLIO_TRANSACTIONS.forEach(tx => {
+    if (!txByDate[tx.date]) txByDate[tx.date] = [];
+    txByDate[tx.date].push(tx);
+  });
+
+  let deposits = 0;
+  const labels      = [];
+  const depositData = [];
+
+  Object.keys(txByDate).sort().forEach(date => {
+    txByDate[date].forEach(tx => {
+      if (tx.type === "deposit") deposits += tx.amount;
+    });
+    labels.push(date);
+    depositData.push(deposits);
+  });
+
+  // Add market value reference point at PRICES_UPDATED date
+  const marketValue = holdings.reduce((s, h) => s + h.shares * h.price, 0);
+  if (labels[labels.length - 1] !== PRICES_UPDATED) {
+    labels.push(PRICES_UPDATED);
+    depositData.push(deposits);
+  }
+
+  if (activeCharts["performanceChart"]) activeCharts["performanceChart"].destroy();
+  const ctx = document.getElementById("performanceChart").getContext("2d");
+  activeCharts["performanceChart"] = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: currentLang === "sv" ? "Insatt kapital" : "Total Deposits",
+          data: depositData,
+          borderColor: "#6c8ef5",
+          backgroundColor: "rgba(108,142,245,0.07)",
+          fill: true,
+          tension: 0,
+          stepped: "before",
+          pointRadius: 2,
+          borderWidth: 2,
+        },
+        {
+          type: "scatter",
+          label: currentLang === "sv" ? "Marknadsvärde (idag)" : "Market Value (today)",
+          data: [{ x: PRICES_UPDATED, y: marketValue }],
+          backgroundColor: "#fbbf24",
+          borderColor: "#fbbf24",
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          pointStyle: "star",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: "time",
+          time: { unit: "month", displayFormats: { month: "MMM yy" } },
+          grid: { display: false },
+          ticks: { color: "#8892a4", font: { size: 11 }, maxTicksLimit: 10 },
+        },
+        y: {
+          grid: { color: "#2a2e42" },
+          ticks: {
+            color: "#8892a4",
+            font: { size: 11 },
+            callback: v => v >= 1000 ? (v / 1000).toFixed(0) + "k" : v,
+          },
+        },
+      },
+      interaction: {
+        mode: "nearest",
+        intersect: true,
+      },
+      plugins: {
+        legend: {
+          labels: { color: "#e2e8f0", font: { size: 11 }, boxWidth: 12, padding: 12 },
+        },
+        tooltip: {
+          backgroundColor: "#1a1d27",
+          borderColor: "#2a2e42",
+          borderWidth: 1,
+          titleColor: "#e2e8f0",
+          bodyColor: "#8892a4",
+          padding: 10,
+          callbacks: {
+            title: items => {
+              if (!items.length) return "";
+              const item = items[0];
+              // Scatter raw is {x, y}; line raw is just a number — use parsed.x (ms timestamp)
+              const date = item.raw?.x != null ? new Date(item.raw.x) : new Date(item.parsed.x);
+              return date.toLocaleDateString(
+                currentLang === "sv" ? "sv-SE" : "en-GB",
+                { year: "numeric", month: "long", day: "numeric" }
+              );
+            },
+            label: ctx => ` ${ctx.dataset.label}: ${fmt.currency(ctx.parsed.y)}`,
+          },
+        },
+      },
+    },
+  });
+}
+
 // ── Full Render ────────────────────────────────────────────────────────────
 function render() {
   const computed = computeHoldings();
@@ -870,6 +1043,7 @@ function render() {
   initFilters(computed);
   initSort(computed);
   renderTable(computed);
+  renderPerformanceSection();
   renderDividendsSection();
   renderDepositsSection();
 }
