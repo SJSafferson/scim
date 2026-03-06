@@ -85,6 +85,15 @@ const DIVIDENDS = [
   { date: "2025-05-19", ticker: "HANZA",   amount: 95.2  },
   { date: "2025-05-21", ticker: "NIBE B",  amount: 63.3  },
   { date: "2025-05-26", ticker: "BILL",    amount: 315   },
+  // 2026 (estimat)
+  { date: "2026-05-01", ticker: "NIBE B",  amount: 86.1,  estimated: true },
+  { date: "2026-05-01", ticker: "BILL",    amount: 180,   estimated: true },
+  { date: "2026-05-01", ticker: "AXFO",    amount: 45,    estimated: true },
+  { date: "2026-05-01", ticker: "INDU C",  amount: 26.25, estimated: true },
+  { date: "2026-05-01", ticker: "VOLV B",  amount: 52,    estimated: true },
+  { date: "2026-05-01", ticker: "HANZA",   amount: 178.5, estimated: true },
+  { date: "2026-05-01", ticker: "BERNER B",amount: 215,   estimated: true },
+  { date: "2026-05-01", ticker: "CTT",     amount: 76.8,  estimated: true },
 ];
 
 // ── Portfolio Transaction History ───────────────────────────────────────────
@@ -550,24 +559,27 @@ const DIVIDEND_TICKER_COLORS = [
 ];
 
 function computeDividendsByYear() {
-  const byYear   = {};   // year → { ticker → total }
-  const tickerSet = new Set();
+  const byYear        = {};   // year → { ticker → total }
+  const tickerSet     = new Set();
+  const estimatedYears = new Set();
 
   DIVIDENDS.forEach(d => {
     const year = d.date.slice(0, 4);
     if (!byYear[year]) byYear[year] = {};
     byYear[year][d.ticker] = (byYear[year][d.ticker] || 0) + d.amount;
     tickerSet.add(d.ticker);
+    if (d.estimated) estimatedYears.add(year);
   });
 
   // Consistent ticker order (sorted alphabetically)
   const tickers = [...tickerSet].sort();
-  return { byYear, tickers };
+  return { byYear, tickers, estimatedYears };
 }
 
 function renderDividendsSection() {
-  const { byYear, tickers } = computeDividendsByYear();
+  const { byYear, tickers, estimatedYears } = computeDividendsByYear();
   const yearKeys = Object.keys(byYear).sort();
+  const yearLabel = y => estimatedYears.has(y) ? y + "e" : y;
 
   const tickerColors = {};
   tickers.forEach((t, i) => { tickerColors[t] = DIVIDEND_TICKER_COLORS[i % DIVIDEND_TICKER_COLORS.length]; });
@@ -585,7 +597,7 @@ function renderDividendsSection() {
   const ctx = document.getElementById("dividendsChart").getContext("2d");
   activeCharts["dividendsChart"] = new Chart(ctx, {
     type: "bar",
-    data: { labels: yearKeys, datasets },
+    data: { labels: yearKeys.map(yearLabel), datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -594,7 +606,7 @@ function renderDividendsSection() {
           const pts = activeCharts["dividendsChart"].getElementsAtEventForMode(event.native, "index", { intersect: false }, false);
           return pts.length > 0 ? pts[0].index : -1;
         })();
-        if (index >= 0) showDividendModal(yearKeys[index], byYear, tickerColors);
+        if (index >= 0) showDividendModal(yearKeys[index], yearLabel(yearKeys[index]), byYear, tickerColors);
       },
       onHover: (event, elements) => {
         event.native.target.style.cursor = elements.length > 0 ? "pointer" : "default";
@@ -643,15 +655,15 @@ function renderDividendsSection() {
   const grandTotal = DIVIDENDS.reduce((s, d) => s + d.amount, 0);
   divYearTotalsEl.innerHTML = yearKeys.map(y => {
     const total = Object.values(byYear[y]).reduce((s, v) => s + v, 0);
-    return `<div class="div-year-item" data-year="${y}"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
+    return `<div class="div-year-item" data-year="${y}"><span class="div-year">${yearLabel(y)}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
   }).join("") + `<div class="div-year-item div-year-grand-total"><span class="div-year">${t("total")}</span><span class="div-total">${fmt.currency(grandTotal)}</span></div>`;
   divYearTotalsEl.querySelectorAll(".div-year-item[data-year]").forEach(el => {
-    el.addEventListener("click", () => showDividendModal(el.dataset.year, byYear, tickerColors));
+    el.addEventListener("click", () => showDividendModal(el.dataset.year, yearLabel(el.dataset.year), byYear, tickerColors));
   });
 }
 
 // ── Dividend Year Modal ────────────────────────────────────
-function showDividendModal(year, byYear, tickerColors) {
+function showDividendModal(year, label, byYear, tickerColors) {
   const yearData = byYear[year] || {};
   const tickers = Object.keys(yearData).sort((a, b) => yearData[b] - yearData[a]);
   const values  = tickers.map(t => yearData[t]);
@@ -659,7 +671,7 @@ function showDividendModal(year, byYear, tickerColors) {
   const total   = values.reduce((s, v) => s + v, 0);
 
   document.getElementById("divModalTitle").textContent =
-    (currentLang === "sv" ? "Utdelningar " : "Dividends ") + year;
+    (currentLang === "sv" ? "Utdelningar " : "Dividends ") + label;
 
   if (activeCharts["divModalChart"]) activeCharts["divModalChart"].destroy();
   const ctx = document.getElementById("divModalChart").getContext("2d");
