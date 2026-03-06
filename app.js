@@ -242,6 +242,7 @@ const TRANSLATIONS = {
     depositsTitle:   "Deposits by Year",
     backBtn:         "← Back",
     pricesUpdated:   "Prices updated",
+    total:           "Total",
     assetClass: { "Equity": "Equity", "Fixed Income": "Fixed Income", "Alternative": "Alternative", "Cash": "Cash" },
   },
   sv: {
@@ -274,6 +275,7 @@ const TRANSLATIONS = {
     depositsTitle:   "Insättningar per år",
     backBtn:         "← Tillbaka",
     pricesUpdated:   "Priser uppdaterade",
+    total:           "Totalt",
     assetClass: { "Equity": "Aktier", "Fixed Income": "Räntebärande", "Alternative": "Alternativa", "Cash": "Kassa" },
   },
 };
@@ -638,11 +640,12 @@ function renderDividendsSection() {
 
   // Year totals summary
   const divYearTotalsEl = document.getElementById("divYearTotals");
+  const grandTotal = DIVIDENDS.reduce((s, d) => s + d.amount, 0);
   divYearTotalsEl.innerHTML = yearKeys.map(y => {
     const total = Object.values(byYear[y]).reduce((s, v) => s + v, 0);
     return `<div class="div-year-item" data-year="${y}"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(total)}</span></div>`;
-  }).join("");
-  divYearTotalsEl.querySelectorAll(".div-year-item").forEach(el => {
+  }).join("") + `<div class="div-year-item div-year-grand-total"><span class="div-year">${t("total")}</span><span class="div-total">${fmt.currency(grandTotal)}</span></div>`;
+  divYearTotalsEl.querySelectorAll(".div-year-item[data-year]").forEach(el => {
     el.addEventListener("click", () => showDividendModal(el.dataset.year, byYear, tickerColors));
   });
 }
@@ -839,9 +842,10 @@ function renderDepositsSection() {
     },
   });
 
+  const depositGrandTotal = amounts.reduce((s, v) => s + v, 0);
   document.getElementById("depositYearTotals").innerHTML = yearKeys.map(y =>
     `<div class="div-year-item"><span class="div-year">${y}</span><span class="div-total">${fmt.currency(byYear[y])}</span></div>`
-  ).join("");
+  ).join("") + `<div class="div-year-item div-year-grand-total"><span class="div-year">${t("total")}</span><span class="div-total">${fmt.currency(depositGrandTotal)}</span></div>`;
 }
 
 // ── Full Render ────────────────────────────────────────────────────────────

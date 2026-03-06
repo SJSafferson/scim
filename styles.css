@@ -538,6 +538,15 @@ main.container { padding: 28px 24px; }
 }
 .div-year-item:hover { opacity: 0.7; }
 
+.div-year-grand-total {
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+  margin-left: 4px;
+  cursor: default;
+}
+.div-year-grand-total:hover { opacity: 1; }
+.div-year-grand-total .div-total { color: var(--accent); }
+
 .modal-overlay {
   display: none;
   position: fixed;
