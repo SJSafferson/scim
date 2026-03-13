@@ -39,18 +39,18 @@ const QUOTES = [
 //   price        - Fallback price per share (SEK) — used if live fetch fails
 //   costBasis    - Total cost basis (SEK, what you paid in total)
 
-const PRICES_UPDATED = "2026-03-06"; // ← uppdatera detta när du ändrar priserna
+const PRICES_UPDATED = "2026-03-13"; // ← uppdatera detta när du ändrar priserna
 
 const holdings = [
-  { name: "Nibe Industrier AB",            ticker: "NIBE B",   yahooSymbol: "NIBE-B.ST",  assetClass: "Equity", shares: 246, price: 35.01,  costBasis: 11384.88 },
-  { name: "Billerud AB",                   ticker: "BILL",     yahooSymbol: "BILL.ST",    assetClass: "Equity", shares: 90,  price: 77.8,  costBasis: 10001.70 },
-  { name: "Axfood AB",                     ticker: "AXFO",     yahooSymbol: "AXFO.ST",    assetClass: "Equity", shares: 5,   price: 321.0, costBasis: 1450.00  },
-  { name: "Industrivärden AB",             ticker: "INDU C",   yahooSymbol: "INDU-C.ST",  assetClass: "Equity", shares: 3,   price: 482.0, costBasis: 1247.01  },
-  { name: "Volvo AB",                      ticker: "VOLV B",   yahooSymbol: "VOLV-B.ST",  assetClass: "Equity", shares: 4,   price: 329.2, costBasis: 1184.00  },
-  { name: "ARK Innovation UCITS ETF USD A",ticker: "ARXK",     yahooSymbol: "ARXK.DE",    assetClass: "Equity", shares: 18,  price: 70.60,  costBasis: 1342.32  },
-  { name: "Hanza AB",                      ticker: "HANZA",    yahooSymbol: "HANZA.ST",   assetClass: "Equity", shares: 119, price: 165.2, costBasis: 7551.74  },
-  { name: "Berner Industrier AB",          ticker: "BERNER B", yahooSymbol: "BERNER-B.ST",assetClass: "Equity", shares: 172, price: 103.0, costBasis: 9193.40  },
-  { name: "CTT Systems AB",                ticker: "CTT",      yahooSymbol: "CTT.ST",     assetClass: "Equity", shares: 32,  price: 140.8, costBasis: 9064.96  },
+  { name: "Nibe Industrier AB",            ticker: "NIBE B",   yahooSymbol: "NIBE-B.ST",  assetClass: "Equity", shares: 246, price: 34.43,  costBasis: 11384.88 },
+  { name: "Billerud AB",                   ticker: "BILL",     yahooSymbol: "BILL.ST",    assetClass: "Equity", shares: 90,  price: 75.50,  costBasis: 10001.70 },
+  { name: "Axfood AB",                     ticker: "AXFO",     yahooSymbol: "AXFO.ST",    assetClass: "Equity", shares: 5,   price: 330.20, costBasis: 1450.00  },
+  { name: "Industrivärden AB",             ticker: "INDU C",   yahooSymbol: "INDU-C.ST",  assetClass: "Equity", shares: 3,   price: 482.90, costBasis: 1247.01  },
+  { name: "Volvo AB",                      ticker: "VOLV B",   yahooSymbol: "VOLV-B.ST",  assetClass: "Equity", shares: 4,   price: 327.10, costBasis: 1184.00  },
+  { name: "ARK Innovation UCITS ETF USD A",ticker: "ARXK",     yahooSymbol: "ARXK.DE",    assetClass: "Equity", shares: 18,  price: 70.46,  costBasis: 1342.32  },
+  { name: "Hanza AB",                      ticker: "HANZA",    yahooSymbol: "HANZA.ST",   assetClass: "Equity", shares: 119, price: 159.00, costBasis: 7551.74  },
+  { name: "Berner Industrier AB",          ticker: "BERNER B", yahooSymbol: "BERNER-B.ST",assetClass: "Equity", shares: 172, price: 102.50, costBasis: 9193.40  },
+  { name: "CTT Systems AB",                ticker: "CTT",      yahooSymbol: "CTT.ST",     assetClass: "Equity", shares: 32,  price: 140.60, costBasis: 9064.96  },
   { name: "Saldo",                         ticker: "SALDO",    yahooSymbol: null,          assetClass: "Cash",   shares: 1,   price: 138.39, costBasis: 138.39   },
 ];
 
